@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    image: cookwithai:latest
+    ports:
+      - "8501:8501"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_PATH: /data/cookwithai.db
+    volumes:
+      - cookwithai-data:/data
+    restart: unless-stopped
+
+  # SQLite has no server process: the app owns the .db file on the shared volume,
+  # and sqlite-web mounts the same volume to browse it at http://localhost:8080.
+  db-admin:
+    image: coleifer/sqlite-web:latest
+    # Same UID as the app user, so files SQLite creates next to the .db stay writable by both.
+    user: "1000:1000"
+    ports:
+      - "8080:8080"
+    environment:
+      SQLITE_DATABASE: cookwithai.db
+    volumes:
+      # nocopy: otherwise this image's root-owned /data can seed the fresh volume first,
+      # leaving it unwritable for the app's non-root user.
+      - type: volume
+        source: cookwithai-data
+        target: /data
+        volume:
+          nocopy: true
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  cookwithai-data:

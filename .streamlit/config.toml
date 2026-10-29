@@ -1,0 +1,22 @@
+# Material Design 3 inspired theme (baseline purple palette + Roboto)
+[theme]
+base = "light"
+primaryColor = "#6750A4"
+backgroundColor = "#FEF7FF"
+secondaryBackgroundColor = "#F3EDF7"
+textColor = "#1D1B20"
+borderColor = "#CAC4D0"
+linkColor = "#6750A4"
+baseRadius = "large"
+showWidgetBorder = true
+font = "Roboto:https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+headingFont = "Roboto:https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+
+[client]
+toolbarMode = "minimal"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

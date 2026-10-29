@@ -1,0 +1,10 @@
+[project]
+name = "cookwithai"
+version = "0.1.0"
+description = "AI-powered recipe & pantry assistant (POC)"
+requires-python = ">=3.14"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
