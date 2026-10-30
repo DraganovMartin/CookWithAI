@@ -9,13 +9,53 @@ in the sidebar. Guests can use the app too, but their searches are never written
 
 **Stack:** Python 3.14 · Streamlit (Material Design 3 theme) · SQLite · OpenRouter · Docker
 
-## Quick start (Docker)
+## Quick start
+
+### Local (no Docker)
+
+Requires Python 3.14.
+
+```bash
+cp .env.example .env          # optional — defaults to mock AI responses
+python -m venv .venv          # one-time; skip if .venv already exists, then activate it
+python -m pip install -e ".[dev]"
+python -m streamlit run src/cookwithai/main.py
+```
+
+Run `python -m venv .venv` only once, from a shell where the venv is not active. Re-running it from
+inside the venv fails with "Unable to copy ... venvlauncher.exe", because the running
+`.venv\Scripts\python.exe` can't be overwritten.
+
+To get real AI responses instead of the mock ones, set `LLM_PROVIDER=openrouter` and your
+OpenRouter API key, either in `.env` or in the shell before starting:
+
+```bash
+# bash
+export LLM_PROVIDER=openrouter
+export OPENROUTER_API_KEY=sk-or-...
+python -m streamlit run src/cookwithai/main.py
+```
+
+```powershell
+# PowerShell
+$env:LLM_PROVIDER = "openrouter"
+$env:OPENROUTER_API_KEY = "sk-or-..."
+python -m streamlit run src/cookwithai/main.py
+```
+
+The app is served at http://localhost:8501 and creates the SQLite database at
+`./data/cookwithai.db` on first run.
+
+### Docker
 
 ```bash
 cp .env.example .env          # optional — defaults to mock AI responses
 docker run --rm -v "${PWD}:/project" -w /project python:3.14-slim python scripts/vendor_deps.py
-docker compose up --build
+docker compose up --build -d
 ```
+
+`-d` runs the containers in the background; follow the logs with `docker compose logs -f` and stop
+them with `docker compose down`.
 
 The `docker run` line fills `vendor/` with the Linux packages the image needs. It's a one-time step
 that takes a few minutes, and only needs repeating when the dependencies in `pyproject.toml` change.
@@ -112,22 +152,3 @@ src/cookwithai/
 scripts/vendor_deps.py Fills vendor/ with the Linux packages the Docker image copies in
 tests/                 pytest suite (mock LLM, schemas, repository, services, login pages, OpenRouter)
 ```
-
-## Database
-
-| Table         | Columns                                                                   |
-|---------------|---------------------------------------------------------------------------|
-| `users`       | `id`, `email`, `display_name`, `password_hash`, `session_id`, `login_timestamp`, `session_time` (seconds), `created_at` |
-| `recipes`     | `id`, `user_id` → users, `suggested_recipes` (JSON), `chosen_recipe`, `steps` (JSON), `created_at` |
-| `ingredients` | `id`, `recipe_id` → recipes (1:1), `available_ingredients` (JSON), `missing_ingredients` (JSON) |
-
-One `recipes` row is created per search. `chosen_recipe`, `steps` and `missing_ingredients` are
-filled in when the user picks a suggestion. JSON is stored as `TEXT`, which maps directly to Room
-TypeConverters for the planned Android app. `init_db` adds the `users` columns to older databases.
-The seeded `Guest` user (id 1) only owns searches saved before accounts existed; those stay in the
-database but no longer appear in the app.
-
-## Next iterations
-
-- Switch `LLM_PROVIDER` to `openrouter` and tune prompts/model
-- Android app reusing `schema.sql`
