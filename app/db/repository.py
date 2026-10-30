@@ -1,4 +1,4 @@
-"""Data access for recipe searches. Works with plain dicts/lists; JSON columns are (de)serialised here."""
+"""Data access for users and recipe searches. JSON columns are (de)serialised here."""
 
 import json
 import sqlite3
@@ -17,6 +17,16 @@ class RecipeRecord:
     steps: dict[str, Any] | None = None
     missing_ingredients: list[str] = field(default_factory=list)
 
+
+@dataclass(frozen=True)
+class UserRecord:
+    id: int
+    email: str
+    display_name: str
+    password_hash: str
+
+
+_SELECT_USER = "SELECT id, email, display_name, password_hash FROM users"
 
 _SELECT_RECIPE = """
     SELECT r.id, r.user_id, r.created_at, r.suggested_recipes, r.chosen_recipe, r.steps,
@@ -39,6 +49,61 @@ def _to_record(row: sqlite3.Row) -> RecipeRecord:
     )
 
 
+def _to_user(row: sqlite3.Row) -> UserRecord:
+    return UserRecord(
+        id=row["id"],
+        email=row["email"],
+        display_name=row["display_name"],
+        password_hash=row["password_hash"],
+    )
+
+
+def create_user(
+    conn: sqlite3.Connection, email: str, display_name: str, password_hash: str
+) -> UserRecord:
+    """Insert a user and return it.
+
+    Raises:
+        sqlite3.IntegrityError: If the email is already registered.
+    """
+    row = conn.execute(
+        "INSERT INTO users (email, display_name, password_hash) VALUES (?, ?, ?)"
+        " RETURNING id, email, display_name, password_hash",
+        (email, display_name, password_hash),
+    ).fetchone()
+    return _to_user(row)
+
+
+def get_user_by_email(conn: sqlite3.Connection, email: str) -> UserRecord | None:
+    row = conn.execute(_SELECT_USER + " WHERE email = ?", (email,)).fetchone()
+    return _to_user(row) if row else None
+
+
+def start_session(
+    conn: sqlite3.Connection, user_id: int, session_id: str, session_time: int
+) -> None:
+    """Record a login, replacing any session the user already had."""
+    conn.execute(
+        "UPDATE users SET session_id = ?, login_timestamp = datetime('now'), session_time = ?"
+        " WHERE id = ?",
+        (session_id, session_time, user_id),
+    )
+
+
+def get_user_by_session(conn: sqlite3.Connection, session_id: str) -> UserRecord | None:
+    """Return the session's user, or None if the session is unknown or has expired."""
+    row = conn.execute(
+        _SELECT_USER + " WHERE session_id = ?"
+        " AND datetime(login_timestamp, '+' || session_time || ' seconds') > datetime('now')",
+        (session_id,),
+    ).fetchone()
+    return _to_user(row) if row else None
+
+
+def end_session(conn: sqlite3.Connection, session_id: str) -> None:
+    conn.execute("UPDATE users SET session_id = NULL WHERE session_id = ?", (session_id,))
+
+
 def create_recipe_request(
     conn: sqlite3.Connection,
     user_id: int,
@@ -51,6 +116,7 @@ def create_recipe_request(
         (user_id, json.dumps(suggested_recipes)),
     )
     recipe_id = cursor.lastrowid
+    assert recipe_id is not None  # always set after a successful INSERT
     conn.execute(
         "INSERT INTO ingredients (recipe_id, available_ingredients) VALUES (?, ?)",
         (recipe_id, json.dumps(available_ingredients)),

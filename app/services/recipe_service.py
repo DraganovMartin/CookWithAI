@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 
 from app.db import repository
-from app.db.database import GUEST_USER_ID, connect
+from app.db.database import connect
 from app.llm.base import LLMClient
 from app.llm.schemas import RecipeDetails, RecipeSuggestion
 
@@ -14,9 +14,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RecipeSession:
-    """One search as the UI sees it, whether fresh from the LLM or loaded from history."""
+    """One search as the UI sees it, whether fresh from the LLM or loaded from history.
 
-    recipe_id: int
+    `recipe_id` is None for guests, whose searches are never stored.
+    """
+
+    recipe_id: int | None
     available_ingredients: list[str]
     suggestions: list[RecipeSuggestion]
     details: RecipeDetails | None = None
@@ -41,7 +44,9 @@ def has_expected_mix(suggestions: list[RecipeSuggestion]) -> bool:
 
 
 class RecipeService:
-    def __init__(self, llm: LLMClient, db_path: str, user_id: int = GUEST_USER_ID) -> None:
+    """Recipe use cases for one user; `user_id=None` is a guest, who never touches the database."""
+
+    def __init__(self, llm: LLMClient, db_path: str, user_id: int | None) -> None:
         self._llm = llm
         self._db_path = db_path
         self._user_id = user_id
@@ -55,6 +60,9 @@ class RecipeService:
         if not has_expected_mix(suggestions):
             logger.warning("Unexpected suggestion mix for %s: %s", available, suggestions)
 
+        if self._user_id is None:
+            return RecipeSession(None, available, suggestions)
+
         with connect(self._db_path) as conn:
             recipe_id = repository.create_recipe_request(
                 conn,
@@ -66,23 +74,28 @@ class RecipeService:
 
     def choose(self, session: RecipeSession, suggestion: RecipeSuggestion) -> RecipeDetails:
         details = self._llm.get_recipe_details(suggestion, session.available_ingredients)
-        with connect(self._db_path) as conn:
-            repository.save_chosen_recipe(
-                conn,
-                session.recipe_id,
-                suggestion.title,
-                details.model_dump(),
-                suggestion.missing_ingredients,
-            )
+        if session.recipe_id is not None:
+            with connect(self._db_path) as conn:
+                repository.save_chosen_recipe(
+                    conn,
+                    session.recipe_id,
+                    suggestion.title,
+                    details.model_dump(),
+                    suggestion.missing_ingredients,
+                )
         session.details = details
         return details
 
     def history(self, limit: int = 10) -> list[RecipeSession]:
+        if self._user_id is None:
+            return []
         with connect(self._db_path) as conn:
             records = repository.list_recent(conn, self._user_id, limit)
         return [self._to_session(r) for r in records]
 
     def load(self, recipe_id: int) -> RecipeSession | None:
+        if self._user_id is None:
+            return None
         with connect(self._db_path) as conn:
             record = repository.get_recipe(conn, recipe_id)
         if record is None or record.user_id != self._user_id:

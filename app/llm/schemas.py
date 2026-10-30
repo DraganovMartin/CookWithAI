@@ -14,7 +14,7 @@ class RecipeSuggestion(BaseModel):
     estimated_time_minutes: int = Field(gt=0)
     difficulty: Difficulty = "medium"
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]  # pydantic's documented pattern
     @property
     def uses_only_available(self) -> bool:
         # Derived rather than trusted from the LLM, so it can never contradict missing_ingredients.

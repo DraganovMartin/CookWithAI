@@ -1,7 +1,8 @@
 import pytest
 
-from app.db.database import init_db
+from app.db.database import GUEST_USER_ID, init_db
 from app.llm.mock_client import MockLLMClient
+from app.services.auth_service import AuthService
 from app.services.recipe_service import RecipeService
 
 
@@ -19,4 +20,14 @@ def mock_llm():
 
 @pytest.fixture
 def service(mock_llm, db_path):
-    return RecipeService(mock_llm, db_path)
+    return RecipeService(mock_llm, db_path, GUEST_USER_ID)
+
+
+@pytest.fixture
+def guest_service(mock_llm, db_path):
+    return RecipeService(mock_llm, db_path, None)
+
+
+@pytest.fixture
+def auth(db_path):
+    return AuthService(db_path)

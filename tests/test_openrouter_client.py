@@ -9,10 +9,19 @@ from app.llm.factory import get_llm_client
 from app.llm.mock_client import MockLLMClient
 from app.llm.openrouter_client import OpenRouterClient
 
-VALID_CONTENT = json.dumps({"suggestions": [
-    {"title": "Omelette", "short_description": "Fluffy.", "missing_ingredients": [],
-     "estimated_time_minutes": 10, "difficulty": "easy"},
-]})
+VALID_CONTENT = json.dumps(
+    {
+        "suggestions": [
+            {
+                "title": "Omelette",
+                "short_description": "Fluffy.",
+                "missing_ingredients": [],
+                "estimated_time_minutes": 10,
+                "difficulty": "easy",
+            },
+        ]
+    }
+)
 
 
 def _completion(content: str) -> httpx.Response:
@@ -20,7 +29,9 @@ def _completion(content: str) -> httpx.Response:
 
 
 def _client(handler) -> OpenRouterClient:
-    http = httpx.Client(base_url="https://openrouter.test/api/v1", transport=httpx.MockTransport(handler))
+    http = httpx.Client(
+        base_url="https://openrouter.test/api/v1", transport=httpx.MockTransport(handler)
+    )
     return OpenRouterClient(api_key="test", model="test/model", base_url="", http_client=http)
 
 

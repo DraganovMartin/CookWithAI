@@ -26,7 +26,9 @@ def test_suggestions_are_deterministic(mock_llm):
     reordered = mock_llm.suggest_recipes(["tomato", "eggs"])
     assert first == again
     # Same ingredient set -> same dishes; only the name order in titles follows the input.
-    assert [s.estimated_time_minutes for s in first] == [s.estimated_time_minutes for s in reordered]
+    assert [s.estimated_time_minutes for s in first] == [
+        s.estimated_time_minutes for s in reordered
+    ]
     assert [s.missing_ingredients for s in first] == [s.missing_ingredients for s in reordered]
 
 
@@ -42,7 +44,9 @@ def test_details_flag_missing_ingredients(mock_llm):
     details = mock_llm.get_recipe_details(extended, available)
 
     assert details.title == extended.title
-    assert {i.name for i in details.ingredients if i.is_missing} == set(extended.missing_ingredients)
+    assert {i.name for i in details.ingredients if i.is_missing} == set(
+        extended.missing_ingredients
+    )
     assert {i.name for i in details.ingredients if not i.is_missing} == set(available)
     assert [s.number for s in details.steps] == list(range(1, len(details.steps) + 1))
     assert all("{" not in s.instruction for s in details.steps)

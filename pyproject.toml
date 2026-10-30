@@ -8,3 +8,13 @@ requires-python = ">=3.14"
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-p no:cacheprovider"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+strict = true
+files = ["app"]

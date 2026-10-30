@@ -19,8 +19,13 @@ def test_parses_valid_suggestions():
 
 def test_uses_only_available_is_derived_not_trusted():
     suggestion = RecipeSuggestion.model_validate(
-        {"title": "X", "short_description": "", "missing_ingredients": ["salt"],
-         "estimated_time_minutes": 5, "uses_only_available": True}
+        {
+            "title": "X",
+            "short_description": "",
+            "missing_ingredients": ["salt"],
+            "estimated_time_minutes": 5,
+            "uses_only_available": True,
+        }
     )
     assert suggestion.uses_only_available is False
 
@@ -36,8 +41,10 @@ def test_round_trips_through_model_dump():
         '{"suggestions": []}',
         '{"suggestions": [{"title": "", "short_description": "", "estimated_time_minutes": 5}]}',
         '{"suggestions": [{"title": "A", "short_description": "", "estimated_time_minutes": 0}]}',
-        '{"suggestions": [{"title": "A", "short_description": "", "estimated_time_minutes": 5,'
-        ' "difficulty": "extreme"}]}',
+        (
+            '{"suggestions": [{"title": "A", "short_description": "", "estimated_time_minutes": 5,'
+            ' "difficulty": "extreme"}]}'
+        ),
         "not json",
     ],
 )
@@ -49,8 +56,12 @@ def test_rejects_invalid_suggestions(payload):
 def test_details_require_steps():
     with pytest.raises(ValidationError):
         RecipeDetails.model_validate(
-            {"title": "A", "servings": 2,
-             "ingredients": [{"name": "egg", "quantity": "2"}], "steps": []}
+            {
+                "title": "A",
+                "servings": 2,
+                "ingredients": [{"name": "egg", "quantity": "2"}],
+                "steps": [],
+            }
         )
 
 

@@ -2,10 +2,14 @@
 -- JSON payloads are stored as TEXT (maps to Room TypeConverters).
 
 CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    email         TEXT UNIQUE,                           -- filled by OAuth in the next iteration
-    display_name  TEXT NOT NULL,
-    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    email            TEXT UNIQUE,                        -- login name, stored lowercase; NULL for Guest
+    display_name     TEXT NOT NULL,
+    password_hash    TEXT,                               -- scrypt hash; NULL for Guest
+    session_id       TEXT,                               -- random UUID, NULL when logged out
+    login_timestamp  TEXT,                               -- UTC, set at each login
+    session_time     INTEGER,                            -- session length in seconds
+    created_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- One row per search: suggestions first, chosen recipe + steps once the user picks one.

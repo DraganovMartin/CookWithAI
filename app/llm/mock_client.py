@@ -204,8 +204,9 @@ class MockLLMClient:
             for i, name in enumerate(available)
         ]
         ingredients += [
-            RecipeIngredient(name=name, quantity="to taste" if name == "soy sauce" else "100 g",
-                             is_missing=True)
+            RecipeIngredient(
+                name=name, quantity="to taste" if name == "soy sauce" else "100 g", is_missing=True
+            )
             for name in extras
         ]
         steps = [

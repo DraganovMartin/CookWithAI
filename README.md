@@ -4,7 +4,8 @@ AI-powered recipe & pantry assistant — proof of concept.
 
 Enter the ingredients you have and CookWithAI suggests **3 recipes**: 1–2 that use only what you
 have, and 1–2 that need a few extra ingredients. Pick one and it expands into a full recipe with
-quantities, numbered steps and tips. Every search is stored in SQLite and listed in the sidebar.
+quantities, numbered steps and tips. Logged-in users get every search stored in SQLite and listed
+in the sidebar. Guests can use the app too, but their searches are never written to the database.
 
 **Stack:** Python 3.14 · Streamlit (Material Design 3 theme) · SQLite · OpenRouter · Docker
 
@@ -37,6 +38,26 @@ and the `db-admin` container (sqlite-web) mounts the same volume to inspect it.
 
 The API key is only ever read from the environment (`.env` is gitignored).
 
+## Accounts
+
+Users register and log in with an email (the username) and a password of at least 8 characters.
+Passwords are stored as salted scrypt hashes.
+
+A login lasts a fixed **2 hours** and activity does not extend it. The browser holds only the
+session ID, a random UUID, in a cookie set from JavaScript, because Streamlit has no server-side way
+to set cookies. The start time and length are kept on the server, in the `users` row. Each script
+run checks the session, so reopening the app logs the user back in while the session is active, and
+an open tab logs out within a minute of it ending.
+
+Limits of this proof of concept:
+
+- A user has one session, so logging in on a second device logs out the first.
+- Session IDs are stored in plain text, so anyone who can read the database (including `db-admin`)
+  could use a live session.
+- The cookie can't be `HttpOnly`, because JavaScript sets it.
+- There is no email verification or login rate limiting.
+- The forgotten password page collects an email but doesn't send anything yet.
+
 ## Tests
 
 ```bash
@@ -51,35 +72,43 @@ python -m pytest
 python -m streamlit run app/main.py
 ```
 
+Code checks (settings are in `pyproject.toml`):
+
+```bash
+python -m ruff check app tests
+python -m black --check app tests
+python -m mypy
+```
+
 ## Project layout
 
 ```
 app/
-  main.py              Streamlit page: search → suggestion cards → recipe detail
+  main.py              Streamlit page: login session, search → suggestion cards → recipe detail
   config.py            Settings from environment variables
-  db/                  schema.sql, connection/init, repository (stdlib sqlite3)
+  db/                  schema.sql, connection/init/migration, repository (stdlib sqlite3)
   llm/                 Pydantic schemas, prompts, mock + OpenRouter clients, factory
-  services/            RecipeService — orchestrates the LLM and persistence
-  ui/                  Material-style components and CSS
+  services/            AuthService (accounts, sessions), RecipeService (LLM + persistence)
+  ui/                  Login pages, Material-style components and CSS
 .streamlit/config.toml Material Design 3 theme (purple baseline, Roboto)
-tests/                 pytest suite (mock LLM, schemas, repository, service, OpenRouter client)
+tests/                 pytest suite (mock LLM, schemas, repository, services, login pages, OpenRouter)
 ```
 
 ## Database
 
 | Table         | Columns                                                                   |
 |---------------|---------------------------------------------------------------------------|
-| `users`       | `id`, `email` (for OAuth later), `display_name`, `created_at`             |
+| `users`       | `id`, `email`, `display_name`, `password_hash`, `session_id`, `login_timestamp`, `session_time` (seconds), `created_at` |
 | `recipes`     | `id`, `user_id` → users, `suggested_recipes` (JSON), `chosen_recipe`, `steps` (JSON), `created_at` |
 | `ingredients` | `id`, `recipe_id` → recipes (1:1), `available_ingredients` (JSON), `missing_ingredients` (JSON) |
 
 One `recipes` row is created per search. `chosen_recipe`, `steps` and `missing_ingredients` are
 filled in when the user picks a suggestion. JSON is stored as `TEXT`, which maps directly to Room
-TypeConverters for the planned Android app. Until OAuth lands, everything belongs to a seeded
-`Guest` user (id 1).
+TypeConverters for the planned Android app. `init_db` adds the `users` columns to older databases.
+The seeded `Guest` user (id 1) only owns searches saved before accounts existed; those stay in the
+database but no longer appear in the app.
 
 ## Next iterations
 
-- OAuth login (populate `users.email`, replace the guest user)
 - Switch `LLM_PROVIDER` to `openrouter` and tune prompts/model
 - Android app reusing `schema.sql`
