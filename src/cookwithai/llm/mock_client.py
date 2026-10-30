@@ -4,7 +4,7 @@ import time
 import zlib
 from dataclasses import dataclass
 
-from app.llm.schemas import (
+from cookwithai.llm.schemas import (
     Difficulty,
     RecipeDetails,
     RecipeIngredient,

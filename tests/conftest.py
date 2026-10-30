@@ -1,9 +1,9 @@
 import pytest
 
-from app.db.database import GUEST_USER_ID, init_db
-from app.llm.mock_client import MockLLMClient
-from app.services.auth_service import AuthService
-from app.services.recipe_service import RecipeService
+from cookwithai.db.database import GUEST_USER_ID, init_db
+from cookwithai.llm.mock_client import MockLLMClient
+from cookwithai.services.auth_service import AuthService
+from cookwithai.services.recipe_service import RecipeService
 
 
 @pytest.fixture

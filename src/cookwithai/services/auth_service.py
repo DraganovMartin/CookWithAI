@@ -8,8 +8,8 @@ import sqlite3
 import uuid
 from dataclasses import dataclass
 
-from app.db import repository
-from app.db.database import connect
+from cookwithai.db import repository
+from cookwithai.db.database import connect
 
 SESSION_SECONDS = 2 * 60 * 60
 MIN_PASSWORD_LENGTH = 8

@@ -7,9 +7,11 @@ import pytest
 import streamlit as st
 from streamlit.testing.v1 import AppTest
 
-from app.db.database import connect
+from cookwithai.db.database import connect
 
-APP_PATH = Path(__file__).parents[1] / "app" / "main.py"
+pytestmark = pytest.mark.integration
+
+APP_PATH = Path(__file__).parents[1] / "src" / "cookwithai" / "main.py"
 EMAIL = "cook@example.com"
 PASSWORD = "correct horse"
 

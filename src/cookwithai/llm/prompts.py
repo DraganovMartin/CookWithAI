@@ -1,8 +1,8 @@
-"""Prompts for the OpenRouter backend. Both ask for strict JSON matching app.llm.schemas."""
+"""Prompts for the OpenRouter backend. Both ask for strict JSON matching cookwithai.llm.schemas."""
 
 import json
 
-from app.llm.schemas import RecipeSuggestion
+from cookwithai.llm.schemas import RecipeSuggestion
 
 PANTRY_STAPLES = "salt, pepper, cooking oil and water"
 

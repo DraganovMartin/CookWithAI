@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.recipe_service import has_expected_mix
+from cookwithai.services.recipe_service import has_expected_mix
 
 PANTRIES = [
     ["eggs"],

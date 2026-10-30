@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from app.llm.schemas import RecipeDetails, RecipeSuggestion
+from cookwithai.llm.schemas import RecipeDetails, RecipeSuggestion
 
 _DIFFICULTY_ICON = {
     "easy": ":material/sentiment_satisfied:",
@@ -27,9 +27,10 @@ def suggestion_card(suggestion: RecipeSuggestion, index: int) -> bool:
         st.subheader(suggestion.title, anchor=False)
         availability_badge(suggestion)
         st.write(suggestion.short_description)
+        difficulty_icon = _DIFFICULTY_ICON[suggestion.difficulty]
         st.caption(
             f":material/schedule: {suggestion.estimated_time_minutes} min"
-            f" &nbsp;·&nbsp; {_DIFFICULTY_ICON[suggestion.difficulty]} {suggestion.difficulty.title()}"
+            f" &nbsp;·&nbsp; {difficulty_icon} {suggestion.difficulty.title()}"
         )
         return st.button(
             "Cook this",

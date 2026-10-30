@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from app.llm.openrouter_client import strip_code_fences
-from app.llm.schemas import RecipeDetails, RecipeSuggestion, SuggestionList
+from cookwithai.llm.openrouter_client import strip_code_fences
+from cookwithai.llm.schemas import RecipeDetails, RecipeSuggestion, SuggestionList
 
 VALID_SUGGESTIONS = """{"suggestions": [
   {"title": "Omelette", "short_description": "Fluffy.", "missing_ingredients": [],

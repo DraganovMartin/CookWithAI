@@ -2,9 +2,13 @@ import logging
 
 import pytest
 
-from app.db.database import connect
-from app.llm.schemas import RecipeSuggestion
-from app.services.recipe_service import RecipeService, has_expected_mix, normalize_ingredients
+from cookwithai.db.database import connect
+from cookwithai.llm.schemas import RecipeSuggestion
+from cookwithai.services.recipe_service import (
+    RecipeService,
+    has_expected_mix,
+    normalize_ingredients,
+)
 
 
 def _suggestion(missing):

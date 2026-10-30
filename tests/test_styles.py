@@ -1,6 +1,6 @@
 import re
 
-from app.ui.styles import _CSS
+from cookwithai.ui.styles import _CSS
 
 
 def test_css_has_nothing_the_html_sanitizer_would_reject():

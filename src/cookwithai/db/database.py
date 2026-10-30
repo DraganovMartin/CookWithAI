@@ -58,7 +58,7 @@ def init_db(db_path: str) -> None:
 
 
 if __name__ == "__main__":
-    from app.config import get_settings
+    from cookwithai.config import get_settings
 
     path = get_settings().database_path
     init_db(path)

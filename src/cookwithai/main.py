@@ -1,19 +1,19 @@
-"""CookWithAI Streamlit entry point: run with `streamlit run app/main.py`."""
+"""CookWithAI Streamlit entry point: run with `streamlit run src/cookwithai/main.py`."""
 
 import logging
 
 import streamlit as st
 
-from app.config import get_settings
-from app.db.database import init_db
-from app.llm.base import LLMClient, LLMError
-from app.llm.factory import get_llm_client
-from app.llm.schemas import RecipeDetails
-from app.services.auth_service import SESSION_SECONDS, AuthService, User
-from app.services.recipe_service import RecipeService, RecipeSession
-from app.ui.auth import render_auth_page
-from app.ui.components import recipe_detail_view, suggestion_card
-from app.ui.styles import inject_styles
+from cookwithai.config import get_settings
+from cookwithai.db.database import init_db
+from cookwithai.llm.base import LLMClient, LLMError
+from cookwithai.llm.factory import get_llm_client
+from cookwithai.llm.schemas import RecipeDetails
+from cookwithai.services.auth_service import SESSION_SECONDS, AuthService, User
+from cookwithai.services.recipe_service import RecipeService, RecipeSession
+from cookwithai.ui.auth import render_auth_page
+from cookwithai.ui.components import recipe_detail_view, suggestion_card
+from cookwithai.ui.styles import inject_styles
 
 logging.basicConfig(level=logging.INFO)
 
@@ -256,7 +256,7 @@ def render_search(service: RecipeService) -> None:
 def render_suggestions(service: RecipeService, session: RecipeSession) -> None:
     st.subheader(":material/auto_awesome: Pick a recipe", anchor=False)
     columns = st.columns(len(session.suggestions), gap="medium")
-    for index, (column, suggestion) in enumerate(zip(columns, session.suggestions)):
+    for index, (column, suggestion) in enumerate(zip(columns, session.suggestions, strict=True)):
         with column:
             if suggestion_card(suggestion, index):
                 try:

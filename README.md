@@ -13,8 +13,17 @@ in the sidebar. Guests can use the app too, but their searches are never written
 
 ```bash
 cp .env.example .env          # optional — defaults to mock AI responses
+docker run --rm -v "${PWD}:/project" -w /project python:3.14-slim python scripts/vendor_deps.py
 docker compose up --build
 ```
+
+The `docker run` line fills `vendor/` with the Linux packages the image needs. It's a one-time step
+that takes a few minutes, and only needs repeating when the dependencies in `pyproject.toml` change.
+`vendor/` is gitignored, so a fresh clone has to run it too.
+
+`docker compose build` installs nothing: it only copies `vendor/` and the source into the image, so
+it needs no network for packages. The first build takes about 2 minutes to read `vendor/`, and later
+ones take a couple of seconds, including after code changes.
 
 | URL                     | What                                         |
 |-------------------------|----------------------------------------------|
@@ -67,23 +76,32 @@ docker compose run --rm app pytest
 Or locally with Python 3.14:
 
 ```bash
-python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m venv .venv             # then activate it
+python -m pip install -e ".[dev]"
 python -m pytest
-python -m streamlit run app/main.py
+python -m streamlit run src/cookwithai/main.py
+```
+
+`pytest` reports coverage as well. To run only the unit tests, leaving out the tests that drive the
+whole Streamlit app:
+
+```bash
+python -m pytest -m "not integration"
 ```
 
 Code checks (settings are in `pyproject.toml`):
 
 ```bash
-python -m ruff check app tests
-python -m black --check app tests
+python -m ruff check src tests scripts
+python -m black --check src tests scripts
 python -m mypy
 ```
 
 ## Project layout
 
 ```
-app/
+pyproject.toml         Metadata, pinned dependencies and tool settings
+src/cookwithai/
   main.py              Streamlit page: login session, search → suggestion cards → recipe detail
   config.py            Settings from environment variables
   db/                  schema.sql, connection/init/migration, repository (stdlib sqlite3)
@@ -91,6 +109,7 @@ app/
   services/            AuthService (accounts, sessions), RecipeService (LLM + persistence)
   ui/                  Login pages, Material-style components and CSS
 .streamlit/config.toml Material Design 3 theme (purple baseline, Roboto)
+scripts/vendor_deps.py Fills vendor/ with the Linux packages the Docker image copies in
 tests/                 pytest suite (mock LLM, schemas, repository, services, login pages, OpenRouter)
 ```
 

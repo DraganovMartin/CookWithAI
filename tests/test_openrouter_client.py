@@ -3,11 +3,11 @@ import json
 import httpx
 import pytest
 
-from app.config import Settings
-from app.llm.base import LLMError
-from app.llm.factory import get_llm_client
-from app.llm.mock_client import MockLLMClient
-from app.llm.openrouter_client import OpenRouterClient
+from cookwithai.config import Settings
+from cookwithai.llm.base import LLMError
+from cookwithai.llm.factory import get_llm_client
+from cookwithai.llm.mock_client import MockLLMClient
+from cookwithai.llm.openrouter_client import OpenRouterClient
 
 VALID_CONTENT = json.dumps(
     {

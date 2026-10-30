@@ -2,8 +2,8 @@ import uuid
 
 import pytest
 
-from app.db.database import connect
-from app.services.auth_service import (
+from cookwithai.db.database import connect
+from cookwithai.services.auth_service import (
     SESSION_SECONDS,
     AuthError,
     hash_password,

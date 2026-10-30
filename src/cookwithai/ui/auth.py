@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from app.services.auth_service import AuthError, AuthService, User
+from cookwithai.services.auth_service import AuthError, AuthService, User
 
 
 def _leave_auth_page() -> None:

@@ -4,10 +4,10 @@ import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from app.db import repository
-from app.db.database import connect
-from app.llm.base import LLMClient
-from app.llm.schemas import RecipeDetails, RecipeSuggestion
+from cookwithai.db import repository
+from cookwithai.db.database import connect
+from cookwithai.llm.base import LLMClient
+from cookwithai.llm.schemas import RecipeDetails, RecipeSuggestion
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 """Picks the LLM backend from settings."""
 
-from app.config import Settings
-from app.llm.base import LLMClient
-from app.llm.mock_client import MockLLMClient
-from app.llm.openrouter_client import OpenRouterClient
+from cookwithai.config import Settings
+from cookwithai.llm.base import LLMClient
+from cookwithai.llm.mock_client import MockLLMClient
+from cookwithai.llm.openrouter_client import OpenRouterClient
 
 
 def get_llm_client(settings: Settings) -> LLMClient:

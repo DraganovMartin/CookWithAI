@@ -6,9 +6,9 @@ import re
 import httpx
 from pydantic import BaseModel, ValidationError
 
-from app.llm import prompts
-from app.llm.base import LLMError
-from app.llm.schemas import RecipeDetails, RecipeSuggestion, SuggestionList
+from cookwithai.llm import prompts
+from cookwithai.llm.base import LLMError
+from cookwithai.llm.schemas import RecipeDetails, RecipeSuggestion, SuggestionList
 
 logger = logging.getLogger(__name__)
 

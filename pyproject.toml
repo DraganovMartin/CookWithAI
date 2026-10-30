@@ -1,20 +1,80 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "cookwithai"
 version = "0.1.0"
 description = "AI-powered recipe & pantry assistant (POC)"
+readme = "README.md"
 requires-python = ">=3.14"
+# Exact pins: this is an application, so installs should be reproducible.
+dependencies = [
+    "streamlit==1.66.1",
+    "pydantic==2.14.2",
+    "httpx==0.28.1",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==9.2.0",
+    "pytest-cov==7.1.0",
+]
+dev = [
+    "cookwithai[test]",
+    "black==26.10.1",
+    "mypy==2.4.1",
+    "ruff==0.17.3",
+]
+
+[project.urls]
+Repository = "https://github.com/DraganovMartin/CookWithAI"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cookwithai"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "-p no:cacheprovider"
+addopts = [
+    "-p", "no:cacheprovider",
+    "--strict-markers",
+    "--cov=cookwithai",
+    "--cov-report=term-missing",
+]
+markers = [
+    "integration: drives the whole Streamlit app; skip with -m 'not integration'",
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
 
 [tool.black]
 line-length = 100
+target-version = ["py314"]
 
 [tool.ruff]
 line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
 
 [tool.mypy]
+python_version = "3.14"
 strict = true
-files = ["app"]
+files = ["src"]

@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from app.llm.schemas import RecipeDetails, RecipeSuggestion
+from cookwithai.llm.schemas import RecipeDetails, RecipeSuggestion
 
 
 class LLMError(Exception):

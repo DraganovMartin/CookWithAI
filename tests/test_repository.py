@@ -2,8 +2,8 @@ import sqlite3
 
 import pytest
 
-from app.db import repository
-from app.db.database import GUEST_USER_ID, connect, init_db
+from cookwithai.db import repository
+from cookwithai.db.database import GUEST_USER_ID, connect, init_db
 
 SUGGESTIONS = [{"title": "Omelette"}, {"title": "Shakshuka", "missing_ingredients": ["cumin"]}]
 
